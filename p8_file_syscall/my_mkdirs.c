@@ -9,30 +9,28 @@
  * Syscall Usage of: mkdir, chdir, getcwd
  */
 void mkdirs(char *path) {
-    int r;
     char buf[256], *s;
+    struct stat stat;
+    stat.st_mode
 
-    if ((r = mkdir(path, NEW_DIR_MODE)) < 0) {
+    if ((mkdir(path, NEW_DIR_MODE)) < 0) {
         perror("mkdir");
         exit(EXIT_FAILURE);
     }
 
-    r = chdir(path);
-    if (r < 0) {
+    if ((chdir(path)) < 0) {
         perror("chdir");
         exit(EXIT_FAILURE);
     }
 
-    s = getcwd(buf, sizeof(buf));
-    if (s == NULL) {
+    if ((s = getcwd(buf, sizeof(buf))) == NULL) {
         perror("getcwd");
         exit(EXIT_FAILURE);
     }
 
-    printf("CWD = %s\n", s);
+    printf("mkdir: %s\n", s);
 
-    r = chdir("..");
-    if (r < 0) {
+    if ((chdir("..")) < 0) {
         perror("chdir");
         exit(EXIT_FAILURE);
     }
