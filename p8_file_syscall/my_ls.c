@@ -7,6 +7,44 @@
 #include <dirent.h>
 #include <limits.h>
 
+#define t1 "xwrxwrxwr"
+
+void ls_file(const char *path) {
+    struct stat s;
+    if (lstat(path, &s) < 0) {
+        perror("fstat");
+        exit(EXIT_FAILURE);
+    }
+
+    // 0100 000 111 101 101
+    for (int i = 15; i >= 0; i--) {
+        printf("%d", (s.st_mode >> i) & 1);
+    }
+
+    if (S_ISDIR(s.st_mode)) {
+        printf("d");
+    } else if (S_ISREG(s.st_mode)) {
+        printf("-");
+    } else {
+        printf("l");
+    }
+
+    for (int i = 8; i >= 0; --i) {
+        if (s.st_mode & (1 << i)) {
+            printf("%c", t1[i]);
+        } else {
+            printf("-");
+        }
+    }
+
+    printf("%4d", s.st_nlink);
+    printf("%4d", s.st_gid);
+    printf("%4d", s.st_uid);
+    printf("%8lld", s.st_size);
+
+    printf("%s\n", path);
+}
+
 void ls_dir(const char *path) {
     DIR *d;
     struct dirent *dir;
@@ -18,15 +56,12 @@ void ls_dir(const char *path) {
 
     while ((dir = readdir(d)) != NULL) {
         if (strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0) {
-            printf("%s\n", dir->d_name);
+            ls_file(dir->d_name);
+//            printf("%s\n", dir->d_name);
         }
     }
 
     closedir(d);
-}
-
-void ls_file(const char *path) {
-    printf("%s\n", path);
 }
 
 char *realpath1(const char *filename, char *path) {
